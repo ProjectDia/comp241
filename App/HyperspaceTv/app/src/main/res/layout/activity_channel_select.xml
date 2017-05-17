@@ -97,7 +97,8 @@
         android:layout_alignBaseline="@+id/button2"
         android:layout_alignBottom="@+id/button2"
         android:layout_alignEnd="@+id/button2"
-        android:layout_marginEnd="87dp" />
+        android:layout_marginEnd="87dp"
+        android:onClick="onClickOne" />
 
     <TextView
         android:text="TextView"
@@ -123,6 +124,7 @@
         android:id="@+id/buttonTick"
         android:text="✓"
         android:layout_alignParentBottom="true"
-        android:layout_toEndOf="@+id/button8" />
+        android:layout_toEndOf="@+id/button8"
+        android:onClick="onClickTick" />
 
 </RelativeLayout>
