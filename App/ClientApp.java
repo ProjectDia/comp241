@@ -6,14 +6,14 @@ public class ClientApp{
 		Socket socc = null;
 		PrintWriter out = null;
 		BufferedReader in = null;
-		if(args.length != 2){
-			System.out.println("please specify a port followed by your channel ");
-			return;
-		}
+		//if(args.length != 2){
+			//System.out.println("please specify a port followed by your channel ");
+			//return;
+		//}
 		int portNumber = Integer.parseInt(args[0]);
 
 		try{
-			socc = new Socket("127.0.0.1",portNumber);
+			socc = new Socket("f.l0.nz",241);
 			out = new PrintWriter(socc.getOutputStream(), true); // printwriter for output
 			in = new BufferedReader(new InputStreamReader(socc.getInputStream())); // stream for reading from server
 		} catch (UnknownHostException e) {
