@@ -10,7 +10,7 @@ public class ClientApp{
 			//System.out.println("please specify a port followed by your channel ");
 			//return;
 		//}
-		int portNumber = Integer.parseInt(args[0]);
+		//int portNumber = Integer.parseInt(args[0]);
 
 		try{
 			socc = new Socket("f.l0.nz",241);
