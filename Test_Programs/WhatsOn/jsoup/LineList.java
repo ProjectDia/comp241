@@ -2,7 +2,7 @@
 // ID 1316454
 public class LineList{
 	private Node head; // the node to end all nodes
-	private int count = 0; // comparison counter
+	
 
 	public int getCount(){ // called in filesort returns the number of comparisons 
 		return count;
@@ -18,6 +18,28 @@ public class LineList{
 		toAdd.next = head;
 		head = toAdd; 
 	}
+	public string WhatsOn(){
+		Node temp = new Node();
+		temp = head; 
+		string result;
+		while( temp != null){
+			if (temp.key.equals("On") && temp.next.key.equals("Now")){
+				if (!(temp.key.equals("More")) && !(temp.next.key.equals("info"))){
+					result += temp.key;
+					temp = temp.next;
+					}
+					temp = temp.next;
+			
+			}
+			return result;
+		
+		
+		}
+		
+	
+	
+	
+	}
 	
 	
 	
@@ -32,5 +54,6 @@ public class LineList{
 		public Node(String setdata){
 			data = setdata; // contains the data in a node
 		}
+		
 	}
 }

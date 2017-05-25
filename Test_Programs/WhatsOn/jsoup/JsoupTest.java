@@ -14,20 +14,24 @@ public class JsoupTest {
 		LineList list = new LineList();
         String url = "http://www.freeviewnz.tv/tvguide/whats-on/?channelId=9";
 
-        Document doc = Jsoup.connect(url).get();
+        Document doc = Jsoup.connect(url)
+        .userAgent("Mobile")
+        
+        .get();
 
         String result = doc.text();
 
-        System.out.println(result);
-        
-        
-        Pattern pattern = Pattern.compile("^([a-zA-Z]+)([0-9]+)(.*)");
-        Matcher matcher = pattern.matcher(result);
-        while (matcher.find()){
-        	list.add(matcher.group());
-        	System.out.println(matcher.group());
-        	
+     //  System.out.println(result);
+      
+		  
+       
+        String[] tokens  = result.split("\\s '");
+        for (String s:tokens){
+        	System.out.println(s);
+        	list.add(s);
         }
+        
+       String whatsOn =  list.whatsOn();
        
     }
 
