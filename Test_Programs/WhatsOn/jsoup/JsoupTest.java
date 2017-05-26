@@ -25,13 +25,14 @@ public class JsoupTest {
       
 		  
        
-        String[] tokens  = result.split("\\s '");
+        String[] tokens  = result.split("\\s+");
         for (String s:tokens){
         	System.out.println(s);
-        	list.add(s);
+        	list.add(s.toLowerCase());
         }
         
-       String whatsOn =  list.whatsOn();
+       String show =  list.whatsOn();
+       System.out.println(show);
        
     }
 
