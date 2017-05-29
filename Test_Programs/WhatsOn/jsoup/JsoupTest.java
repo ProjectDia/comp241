@@ -12,10 +12,13 @@ public class JsoupTest{
 		try {		
    			String url = "http://www.freeviewnz.tv/tvguide/whats-on/?channelId=" + (Integer.parseInt(args[0]) + 8);
 			Document doc = Jsoup.connect(url).userAgent("Mobile").get();
-			Elements things = doc.select("div > h3");
-     	  	System.out.println(things.first().toString().replace("<h3>", "").replace("</h3>", ""));
-     	  	Elements thingsxd = doc.select("div.synopsis");
-     	  	System.out.println(thingsxd.first().toString().replace("<div class=\"synopsis\">", "").replace("</div>", "").substring(3));
+			
+			String showName = doc.select("div > h3").first().toString().replace("<h3>", "").replace("</h3>", "");
+     	  	System.out.println(showName);
+     	  	
+     	  	String description = doc.select("div.synopsis").first().toString().replace("<div class=\"synopsis\">", "").replace("</div>", "");
+     	  	description = description.substring(3, description.lastIndexOf('.') + 1);
+     	  	System.out.println(description);
 		}
 		catch (Exception ex){ 
 			ex.printStackTrace(); 
