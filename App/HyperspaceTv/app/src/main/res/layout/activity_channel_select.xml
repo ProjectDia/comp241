@@ -11,29 +11,28 @@
     tools:context="com.comp241.test.hyperspacetv.ChannelSelect">
 
     <Button
+        android:text="Confirm"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/buttonTick"
-        android:text="✓"
-        android:onClick="onClickTick"
+        android:id="@+id/btnConfirm"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_width="200dp" />
+        android:layout_alignStart="@+id/txtChannel"
+        android:layout_alignEnd="@+id/txtChannel"
+        android:textStyle="normal|bold|italic"
+        android:textAlignment="center"
+        android:onClick="onConfirmClick" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="number"
         android:ems="10"
-        android:id="@+id/enterChannel"
-        android:layout_above="@+id/buttonTick"
-        android:layout_alignStart="@+id/buttonTick"
-        android:layout_alignEnd="@+id/buttonTick"
-        android:textStyle="normal|bold|italic"
-        android:textAllCaps="true"
+        android:id="@+id/txtChannel"
+        android:layout_above="@+id/btnConfirm"
+        android:layout_centerHorizontal="true"
+        android:hint="Channel"
         android:textAlignment="center"
-        android:singleLine="true"
-        android:maxLength="3"
-        android:selectAllOnFocus="false"
-        android:hint="Channel" />
-
+        android:textStyle="normal|bold|italic"
+        android:textAllCaps="false"
+        android:maxLength="2" />
 </RelativeLayout>
