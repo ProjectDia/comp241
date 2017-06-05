@@ -6,7 +6,7 @@ public class GetRecommend
 		String genre;
 		String type;
 		//if wanting recommendation based on genre
-		//genre must be in format a,b,c
+		//genre must be in format a,b,c (eg. action or action,comedy,romance)
 		//type must be converted to either feature (for a movie) or tv_series
 		genreSearch(genre, type);
 		
