@@ -8,7 +8,11 @@ import org.jsoup.select.Elements;
 import java.util.*;
 import java.util.regex.*;
 import java.text.*;
-//END NICK'S API
+//BRAD'S API:
+import java.net.*;
+import java.io.*;
+import com.google.gson.Gson; 
+import com.google.gson.GsonBuilder;  
 
 class ServerApp{
 	public static void main(String[] args) throws IOException{
@@ -41,9 +45,10 @@ class ServerApp{
 			//out.println("You have asked for channel data for channel: " + fromClient); 
 
 			//MAKE SURE CLIENT IN IS INTEGER
-			//**
 			String showName = getTVShow(fromClient);
+			String showInfo = getInfo(showName.split(" "));
 			out.println(showName);
+			out.println(showInfo);
 			//out.println(showName[1]);
 
 			out.close();      
@@ -89,4 +94,45 @@ class ServerApp{
 		return tmp;
 		}
 	}
+//BRAD'S API
+	public static String getInfo(String[] show){
+		try{
+			if(show.length < 1){
+	    		System.err.println("Usage: java GetJSON <input>");
+	    		return "problem finding info";
+			}
+			//Setting up the URL
+    		String imdbSearch = "http://www.omdbapi.com/?t=";
+			imdbSearch += show[0];
+			for(int i = 1; i < show.length; i++){
+			    imdbSearch += ("+" + show[i]);
+			}
+			imdbSearch += "&apikey=975f28dc";
+			//Searching the URL
+			URL searchURL = new URL(imdbSearch);
+		   	BufferedReader input = new BufferedReader(new InputStreamReader(searchURL.openStream()));	
+
+		    String programInfo = input.readLine();
+	    	input.close();
+	
+			String JSON = removeArray(programInfo);
+			return JSON;
+		}catch(Exception e){
+			return "error finding info";
+		}
+    }
+
+    public static String removeArray(String output){
+		try{
+		    String remove = "\"Ratings\":";
+
+		    output = output.replaceAll(remove, "").replace("[", "").replace("]", "").replace("{", "").replace("}", "");    
+		    output = "{" + output + "}";
+		}
+		catch(Exception e){
+			output = "Trouble finding show data";
+		}
+
+		return output;
+    }
 }
