@@ -31,6 +31,11 @@ public class ActorSearch
 			
 			Document actorPage = Jsoup.connect(actorURL).get();
 			
+			String actorImage = actorPage.select(".image > a").toString();
+			actorImage = actorImage.substring(actorImage.indexOf("src=") + 5);
+			actorImage = actorImage.substring(0, actorImage.indexOf("\""));
+			System.out.println(actorImage);
+			
 			String knownFor = actorPage.select(".knownfor-title-role > a").toString();
 			String moviePosterHTML = actorPage.select(".knownfor-title > a").toString();
 			String[] moviePosterLink = moviePosterHTML.split("[\r\n]+");
@@ -46,6 +51,7 @@ public class ActorSearch
 				movieInfo[i][1] = movieNames[i].substring(movieNames[i].lastIndexOf(">") + 1);
 				movieInfo[i][2] = moviePosterLink[i].substring(moviePosterLink[i].indexOf("src=") + 5);
 				movieInfo[i][2] = movieInfo[i][2].substring(0, movieInfo[i][2].indexOf("\""));
+				System.out.println("\n");
 				System.out.println(movieInfo[i][2]);
 				System.out.println(movieInfo[i][0]);
 				System.out.println(movieInfo[i][1]);
