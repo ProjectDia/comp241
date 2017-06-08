@@ -34,22 +34,47 @@ class ServerApp{
 				System.err.println("Cannot accept this sock");
 				System.exit(0);
 			}
-			InetAddress i = clientSock.getInetAddress(); // get address of socket
 
 			PrintWriter out = new PrintWriter(clientSock.getOutputStream(), true);
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSock.getInputStream()));
 
-			String fromClient;
-			while((fromClient = in.readLine()) == null){} //continue until the server receives input 
-			System.out.println("A client asked for data about channel: " + fromClient);
-			//out.println("You have asked for channel data for channel: " + fromClient); 
+			//The input from the user should be a single string with format "flag data"
+			/*flag inputs: 
+			0: search for channel data for data: channel number
+			1: recommended algorithm for data: genre 	note: for the recommended tasks, there will be three indeces in the array, 'flag' 'name' 'type'
+			2: recommended algorithm for data: actor
 
-			//MAKE SURE CLIENT IN IS INTEGER
-			String showName = getTVShow(fromClient);
-			String showInfo = getInfo(showName.split(" "));
-			out.println(showName);
-			out.println(showInfo);
-			//out.println(showName[1]);
+			*/
+			String fromClient;
+			while((fromClient = in.readLine()) == null){} //continue until the server receives first line of input 
+
+			String[] userInArr = fromClient.split("\\|");
+
+			switch(userInArr[0]){
+				case "0":
+					Date date = new Date();
+					System.out.println(date + " A client asked for data about channel: " + userInArr[1]);
+					String showName = getTVShow(userInArr[1]);
+					String showInfo = getInfo(showName.split(" "));
+					out.println(showName);
+					out.println(showInfo);
+					break;
+				case "1": 
+					String[][] filmInfo = genreSearch(userInArr[1], userInArr[2]);
+					for(int i = 0; i < 10; i++){
+						out.println(filmInfo[i][0]);
+						out.println(filmInfo[i][1]);
+					}
+					break;
+				case "2":
+				out.println(userInArr[1]);
+					String[][] movieInfo = actorSearch(userInArr[1]);
+					for(int i = 0; i < 4; i++){
+						System.out.println(movieInfo[i][0]);
+						System.out.println(movieInfo[i][1]);
+					}
+					break;
+			}
 
 			out.close();      
     		in.close();                   // disconnect the client
@@ -76,16 +101,7 @@ class ServerApp{
 		}catch(Exception ex){
 			stringOut = "Unknown broadcast; possibly infomercials";
 		}
-		//try to get the synopsis
-		/*
-		try{
-			String description = doc.select("div.synopsis").first().toString().replace("<div class=\"synopsis\">", "").replace("</div>", "");
-			description = description.substring(3, description.lastIndexOf('.') + 1);
-			stringOut[1] = description;
-		}catch(Exception ex){
-			stringOut[0] = "No info available";
-		}
-		*/
+		
 		return stringOut;
 	}catch (Exception ex){ 
 		ex.printStackTrace(); 
@@ -135,4 +151,83 @@ class ServerApp{
 
 		return output;
     }
+    public static String[][] genreSearch(String genre, String type)
+	{
+		try
+		{
+			String genreSearch = "http://www.imdb.com/search/title?count=10&genres=";
+			
+			genreSearch += genre + "&title_type=" + type;
+			
+			Document doc = Jsoup.connect(genreSearch).get();
+			
+			String filmNames = doc.select(".lister-item-header > a").toString();
+			
+			String[] filmArray = filmNames.split("[\r\n]+");
+			String[][] filmInfo = new String[10][2];
+			
+			for(int i = 0; i < 10; i++)
+			{
+				filmArray[i] = filmArray[i].replace("</a>", "");
+				filmInfo[i][0] = filmArray[i].substring(filmArray[i].indexOf("\"") + 1);
+				filmInfo[i][0] = filmInfo[i][0].substring(0, filmInfo[i][0].lastIndexOf("/"));
+				filmInfo[i][0] = "http://www.imdb.com" + filmInfo[i][0];
+				filmInfo[i][1] = filmArray[i].substring(filmArray[i].lastIndexOf(">") + 1);
+			}
+			return filmInfo;
+		}
+		catch (Exception e)
+		{
+			return null;
+		}	
+	}
+	public static String[][] actorSearch(String name)
+	{
+		try
+		{
+			String nameSearch = "http://www.imdb.com/search/name?name=";
+			
+			String[] nameArray = name.split(" ");
+			
+			nameSearch += nameArray[0];
+			
+			for(int i = 1; i < nameArray.length; i++)
+			{
+				nameSearch += ("%20" + nameArray[i]);
+			}
+			System.out.println(name);
+			Document doc = Jsoup.connect(nameSearch).get();
+			
+			String actorURLEnd = doc.select(".name > a").first().toString();
+			actorURLEnd = actorURLEnd.substring(9, actorURLEnd.lastIndexOf("/"));
+			actorURLEnd = actorURLEnd.substring(0, actorURLEnd.lastIndexOf("/"));
+			
+			String actorURL = "http://www.imdb.com" + actorURLEnd;
+			
+			Document actorPage = Jsoup.connect(actorURL).get();
+			
+			String actorImage = actorPage.select(".image > a").toString();
+			actorImage = actorImage.substring(actorImage.indexOf("src=") + 5);
+			actorImage = actorImage.substring(0, actorImage.indexOf("\""));
+			System.out.println(actorImage);
+			
+			String knownFor = actorPage.select(".knownfor-title-role > a").toString();
+			String[] movieNames = knownFor.split("[\r\n]+");
+			String[][] movieInfo = new String[4][2];
+			
+			for(int i = 0; i < 4; i++)
+			{
+				movieNames[i] = movieNames[i].replace("</a>", "");
+				movieInfo[i][0] = movieNames[i].substring(movieNames[i].indexOf("\"") + 1);
+				movieInfo[i][0] = movieInfo[i][0].substring(0, movieInfo[i][0].lastIndexOf("/"));
+				movieInfo[i][0] = "http://www.imdb.com" + movieInfo[i][0];
+				movieInfo[i][1] = movieNames[i].substring(movieNames[i].lastIndexOf(">") + 1);
+			}
+			return movieInfo;
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
 }
