@@ -1,13 +1,20 @@
 package com.comp241.test.hyperspacetv;
 
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.os.AsyncTask;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,71 +36,124 @@ public class ChannelSelect extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
-    public void onChannelSelectClick(View v) {
-        setContentView(R.layout.activity_channel_select);
-    }
-
     public void onConfirmClick(View v) {
         txtChannel = (EditText) findViewById(R.id.txtChannel);
         channelTxt = txtChannel.getText().toString();
         if (channelTxt.length() == 0) {
-            Toast toast = new Toast(getApplicationContext());
-            toast.setGravity(Gravity.TOP | Gravity.LEFT, 0, 0);
-            toast.makeText(ChannelSelect.this, "Enter Channel Number", toast.LENGTH_SHORT).show();
+            toastMessage("Enter Channel Number");
             return;
         } else {
             try {
-                Log.w("WHATS UP", "channel " + channelTxt);
                 channelNumber = Integer.parseInt(channelTxt);
-                channelTxt = "";
                 new Client().execute("" + channelNumber);
             } catch (Exception e) {
-                return;
             }
         }
     }
 
-    public void showInfo(String info) {
+    public void onChannelSelectClick(View v) {
+        setContentView(R.layout.activity_channel_select);
+    }
+
+    public void toastMessage(String message){
+        Toast toast = new Toast(getApplicationContext());
+        toast.setGravity(Gravity.TOP | Gravity.LEFT, 0, 0);
+        toast.makeText(ChannelSelect.this, message, toast.LENGTH_SHORT).show();
+    }
+
+    public void displayInfo(String info) {
+        String showDataText = "";
         String[] array = info.split("\\|");
         setContentView(R.layout.activity_channel_data);
         TextView txtTitle = (TextView) findViewById(R.id.txtTitle);
         TextView txtShowData = (TextView) findViewById(R.id.txtShowData);
+        TextView txtActorLinks = (TextView) findViewById(R.id.txtActorLinks);
+        ImageView imgPoster = (ImageView)findViewById(R.id.imgPoster);
+        Button[] actorButtons = {(Button) findViewById(R.id.btnActorOne),
+                (Button) findViewById(R.id.btnActorTwo),
+                (Button) findViewById(R.id.btnActorThree),
+                (Button) findViewById(R.id.btnActorFour)};
+        int index;
+        txtTitle.setTextSize(32);
+        txtShowData.setTextSize(20);
         try {
             Gson gson = new Gson();
             ShowInfo showinfo = gson.fromJson(array[1], ShowInfo.class);
             if (showinfo.Response.equals("True")) {
                 txtTitle.setText(showinfo.Title + " (" + showinfo.Year + ")");
-                txtShowData.setText(showinfo.Actors);
+                showDataText += (!"N/A".equals(showinfo.Rated))?"Rated: " + showinfo.Rated + "\n":"";
+                showDataText += (!"N/A".equals(showinfo.Released))?"Released: " + showinfo.Released + "\n":"";
+                showDataText += (!"N/A".equals(showinfo.Runtime))?"Runtime: " + showinfo.Runtime + "\n":"";
+                showDataText += (!"N/A".equals(showinfo.Genre))?"Genre: " + showinfo.Genre + "\n":"";
+                showDataText += (!"N/A".equals(showinfo.Director))?"Director: " + showinfo.Director + "\n":"";
+                showDataText += (!"N/A".equals(showinfo.Writer))?"Writer: " + showinfo.Writer + "\n":"";
+                showDataText += (!"N/A".equals(showinfo.Plot))?"\nPlot: " + showinfo.Plot + "\n":"";
+                showDataText += (!"N/A".equals(showinfo.Awards))?"\nAwards: " + showinfo.Awards + "\n":"";
+                showDataText += (!"N/A".equals(showinfo.imdbRating))?"Rating: " + showinfo.imdbRating + "/10\n":"";
+                txtShowData.setText(showDataText);
+                //txtShowData.setText("Description: " + showinfo.Plot + "\nActors: " + showinfo.Actors +
+                //"\nDirector: " + showinfo.Director);
+                new SetImageTask(imgPoster).execute(showinfo.Poster);
+                String[] actors = showinfo.Actors.split("\\,");
+                for (index = 0; index < actors.length; index++){
+                    actorButtons[index].setText(actors[index]);
+                }
+                for (index = 0; index < 4 - actors.length; index--){
+                    actorButtons[3 - index].setVisibility(View.INVISIBLE);
+                }
             } else {
                 txtTitle.setText(array[0]);
                 txtShowData.setText("...No additional info...");
+                for (index = 0; index < 4; index++) actorButtons[index].setVisibility(View.INVISIBLE);
+                imgPoster.setVisibility(View.INVISIBLE);
+                txtActorLinks.setVisibility(View.INVISIBLE);
             }
         }
         catch(Exception e)
         {
             txtTitle.setText(array[0]);
-            txtShowData.setText("...No additional info...");
+            txtShowData.setText("...Exception " + e.getMessage() + "...");
+        }
+    }
+
+    private class SetImageTask extends AsyncTask<String, String, Bitmap> {
+        ImageView imgView;
+
+        public SetImageTask(ImageView imageView){
+            imgView = imageView;
+        }
+
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            Bitmap image = null;
+            String imageUrl = params[0];
+            try {
+                InputStream imageStream = new URL(imageUrl).openStream();
+                image = BitmapFactory.decodeStream(imageStream);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return image;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap image) {
+            imgView.setImageBitmap(image);
         }
     }
 
     private class Client extends AsyncTask<String, String, String> {
-        String fromServer;
-        Socket socc;
-        PrintWriter out;
-        BufferedReader in;
 
         @Override
         protected String doInBackground(String... params) {
             String received = "";
-
             try {
-                socc = new Socket("f.l0.nz", 1234);
-                out = new PrintWriter(socc.getOutputStream(), true);
-                out.println(params[0]);
-                in = new BufferedReader(new InputStreamReader(socc.getInputStream()));
-                while ((fromServer = in.readLine()) != null) {
-                    received += fromServer + "|";
-                }
+                String fromServer;
+                Socket socket = new Socket("f.l0.nz", 1234);
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                out.println("0|" + params[0]);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                while ((fromServer = in.readLine()) != null) received += fromServer + "|";
                 in.close();
             } catch (UnknownHostException e) {
                 Log.w("error", "Unknown host");
@@ -102,13 +162,13 @@ public class ChannelSelect extends AppCompatActivity {
             } catch (Exception e) {
                 Log.w("error", "Other");
             }
-
             return received;
         }
 
         @Override
-        protected void onPostExecute(String result) {
-            showInfo(result);
+        protected void onPostExecute(String info) {
+            if (!info.split("\\|")[0].equals("error receiving channel data")) displayInfo(info);
+            else toastMessage("Enter Valid Freeview Channel Number");
         }
     }
 
