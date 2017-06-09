@@ -62,20 +62,21 @@ public class ChannelSelect extends AppCompatActivity {
     }
 
     public void displayInfo(String info) {
+        int index;
         String showDataText = "";
         String[] array = info.split("\\|");
         setContentView(R.layout.activity_channel_data);
         TextView txtTitle = (TextView) findViewById(R.id.txtTitle);
+        txtTitle.setTextSize(32);
         TextView txtShowData = (TextView) findViewById(R.id.txtShowData);
+        txtShowData.setTextSize(20);
         TextView txtActorLinks = (TextView) findViewById(R.id.txtActorLinks);
         ImageView imgPoster = (ImageView)findViewById(R.id.imgPoster);
         Button[] actorButtons = {(Button) findViewById(R.id.btnActorOne),
                 (Button) findViewById(R.id.btnActorTwo),
                 (Button) findViewById(R.id.btnActorThree),
                 (Button) findViewById(R.id.btnActorFour)};
-        int index;
-        txtTitle.setTextSize(32);
-        txtShowData.setTextSize(20);
+        for (index = 0; index < 4; index++) actorButtons[index].setVisibility(View.INVISIBLE);
         try {
             Gson gson = new Gson();
             ShowInfo showinfo = gson.fromJson(array[1], ShowInfo.class);
@@ -91,20 +92,15 @@ public class ChannelSelect extends AppCompatActivity {
                 showDataText += (!"N/A".equals(showinfo.Awards))?"\nAwards: " + showinfo.Awards + "\n":"";
                 showDataText += (!"N/A".equals(showinfo.imdbRating))?"Rating: " + showinfo.imdbRating + "/10\n":"";
                 txtShowData.setText(showDataText);
-                //txtShowData.setText("Description: " + showinfo.Plot + "\nActors: " + showinfo.Actors +
-                //"\nDirector: " + showinfo.Director);
                 new SetImageTask(imgPoster).execute(showinfo.Poster);
                 String[] actors = showinfo.Actors.split("\\,");
                 for (index = 0; index < actors.length; index++){
                     actorButtons[index].setText(actors[index]);
-                }
-                for (index = 0; index < 4 - actors.length; index--){
-                    actorButtons[3 - index].setVisibility(View.INVISIBLE);
+                    actorButtons[index].setVisibility(View.VISIBLE);
                 }
             } else {
                 txtTitle.setText(array[0]);
                 txtShowData.setText("...No additional info...");
-                for (index = 0; index < 4; index++) actorButtons[index].setVisibility(View.INVISIBLE);
                 imgPoster.setVisibility(View.INVISIBLE);
                 txtActorLinks.setVisibility(View.INVISIBLE);
             }
